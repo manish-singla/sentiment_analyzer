@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Sentiment Analysis</h1>
+    <button onclick="processEntireCSV()">Process Entire CSV</button>
+	<br>
+	<br>
+    <div>
+        <label for="hashtag">Enter a #tag:</label>
+        <input type="text" id="hashtag" name="hashtag">
+    </div>
+    <button onclick="processTag()">Process #tag Tweets</button>
+	<br>
+	<br>
+
+    <div>
+        <label for="tweet">Enter a tweet:</label>
+        <input type="text" id="tweet" name="tweet">
+    </div>
+    <button onclick="processTweet()">Process User Tweet</button>
+    <div>
+        <canvas id="chart"></canvas>
+    </div>
+
+    <script>
+        var myChart; // Global variable to store chart instance
+
+        function updateChart(data) {
+            if (myChart) {
+                myChart.destroy(); // Destroy existing chart instance
+            }
+
+            var ctx = document.getElementById('chart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Positive', 'Negative', 'Neutral'],
+                    datasets: [{
+                        label: '# of Sentiments',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        function processEntireCSV() {
+            var data = [50, 30, 20]; // Example data
+            updateChart(data);
+        }
+
+        function processTag() {
+            var hashtag = document.getElementById('hashtag').value;
+            var data = [40, 20, 40]; // Example data
+            updateChart(data);
+        }
+        
+        function processTweet() {
+		    var tweet = document.getElementById('tweet').value;
+		    
+		    // Make an AJAX request to Flask route for processing the entered tweet
+		    fetch('/process_tweet', {
+		        method: 'POST',
+		        headers: {
+		            'Content-Type': 'application/x-www-form-urlencoded',
+		        },
+		        body: 'tweet=' + encodeURIComponent(tweet)
+		    })
+		    .then(response => response.json())
+		    .then(data => {
+		        // Update chart with received data
+		        updateChart(data);
+		    })
+		    .catch(error => {
+		        console.error('Error:', error);
+		    });
+		}
+
+    </script>
+</body>
+</html>
+
